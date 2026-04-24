@@ -1,4 +1,5 @@
 NAME        := a.out
+# ncursesのオプションをgccにつける
 CC          := gcc
 CFLAGS      := -Wall -Wextra -std=c99 -pedantic-errors -MMD -MP
 
@@ -18,7 +19,7 @@ all: $(NAME)
 # リンク工程
 
 $(NAME): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ -lncurses
 
 
 # コンパイル工程（ディレクトリ作成も同時に行う）
