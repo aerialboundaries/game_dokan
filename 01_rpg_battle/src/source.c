@@ -75,6 +75,13 @@ CHARACTER monsters[MONSTER_MAX] = {
     },
 };
 
+// [5-3] declare command names
+char commandNames[COMMAND_MAX][4 * 3 + 1] = {
+    "たたかう", // [5-3-1]COMMAND_FIGHT
+    "じゅもん", // [5-3-2]COMMAND_SPELL
+    "にげる"    // [5-3-3]COMMAND_RUN
+};
+
 // array of characters
 CHARACTER characters[CHARACTER_MAX];
 
@@ -82,6 +89,7 @@ CHARACTER characters[CHARACTER_MAX];
 void Battle(int _monster);   // battle scene
 void Init(void);             // initialize the game
 void DrawBattleScreen(void); // draw battle sceen
+void SelectCommand();        // [6-3] select commands
 
 /* [6-6] main */
 int main(void) {
@@ -140,6 +148,9 @@ void Battle(int _monster) {
 
   //[6-4-7] loop until battle ends
   while (1) {
+    //[6-4-8] select command
+    SelectCommand();
+
     //[6-4-9] repeat characters
     for (int i = 0; i < CHARACTER_MAX; i++) {
       // [6-4-10] refresh battle scene
@@ -192,4 +203,46 @@ void DrawBattleScreen(void) {
   //[6-2-7] one blank row
   printw("\n");
 
+  refresh(); // printw and refersh() should be one set.
+
 } // draw battle sceen
+
+void SelectCommand() {
+  // [6-3-2] roop until command is determined
+  while (1) {
+    // [6-3-3] call DrawBattleScreen();
+    DrawBattleScreen();
+
+    // [6-3-4] display list of commands
+    for (int i = 0; i < COMMAND_MAX; i++) {
+      // [6-3-5] if chosen command
+      if (i == characters[CHARACTER_PLAYER].command) {
+        // [6-3-6] draw cursor
+        printw("＞");
+        refresh();
+        // [6-3-7] if not chosen command
+      } else {
+        // [6-3-8] draw wide space
+        printw("　");
+        refresh();
+      }
+
+      // [6-3-9] display command names
+      printw("%s\n", commandNames[i]); // ncursesではprintfではなくprintwを使う
+      refresh(); // printwはrefresh()が呼ばれるまで画面を更新しないのでprintwとセットで使う。
+                 // printwを複数実行した後で一気に画面表示を更新することで速度を上げるため
+    }
+    // [6-3-10] selection by input key
+    switch (_getch()) {
+    case 'w': // [6-3-11] if w key is hit
+      // [6-3-12] change to up command
+      characters[CHARACTER_PLAYER].command--;
+      break;
+
+    case 's': // [6-3-13] if s key is hit
+              // [6-13-14] change to down command
+      characters[CHARACTER_PLAYER].command++;
+      break;
+    }
+  }
+} // [6-3] select commands
