@@ -156,7 +156,7 @@ void Battle(int _monster) {
       // [6-4-10] refresh battle scene
       DrawBattleScreen();
 
-      // [6-4-11] separate with chosen commmand
+      // [6-4-11] selection by chosen commmand
       switch (characters[i].command) {
       case COMMAND_FIGHT: // [6-4-12] fight
                           // // [6-4-13] display message to fight
@@ -219,13 +219,12 @@ void SelectCommand() {
       if (i == characters[CHARACTER_PLAYER].command) {
         // [6-3-6] draw cursor
         printw("＞");
-        refresh();
         // [6-3-7] if not chosen command
       } else {
         // [6-3-8] draw wide space
         printw("　");
-        refresh();
       }
+      refresh();
 
       // [6-3-9] display command names
       printw("%s\n", commandNames[i]); // ncursesではprintfではなくprintwを使う
@@ -244,5 +243,8 @@ void SelectCommand() {
       characters[CHARACTER_PLAYER].command++;
       break;
     }
+    // [6-3-17] loop cursor up and down
+    characters[CHARACTER_PLAYER].command =
+        (COMMAND_MAX + characters[CHARACTER_PLAYER].command) % COMMAND_MAX;
   }
 } // [6-3] select commands
