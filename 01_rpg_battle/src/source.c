@@ -142,6 +142,9 @@ void Battle(int _monster) {
   while (1) {
     //[6-4-9] repeat characters
     for (int i = 0; i < CHARACTER_MAX; i++) {
+      // [6-4-10] refresh battle scene
+      DrawBattleScreen();
+
       // [6-4-11] separate with chosen commmand
       switch (characters[i].command) {
       case COMMAND_FIGHT: // [6-4-12] fight
@@ -166,6 +169,9 @@ void Init(void) {
 } // initialize the game
 
 void DrawBattleScreen(void) {
+  // [6-2-1] clear screen
+  clear(); // ncursesの画面消去
+
   // display player name
   printw("%s\n", characters[CHARACTER_PLAYER]
                      .name); // ncurses needs printw insted of printf
