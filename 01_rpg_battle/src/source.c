@@ -224,13 +224,16 @@ void SelectCommand() {
         // [6-3-8] draw wide space
         printw("　");
       }
-      refresh();
 
       // [6-3-9] display command names
       printw("%s\n", commandNames[i]); // ncursesではprintfではなくprintwを使う
-      refresh(); // printwはrefresh()が呼ばれるまで画面を更新しないのでprintwとセットで使う。
-                 // printwを複数実行した後で一気に画面表示を更新することで速度を上げるため
     }
+    refresh(); // printwはrefresh()が呼ばれるまで画面を更新しないのでprintwとセットで使う。
+               // printwを複数実行した後で一気に画面表示を更新することで速度を上げるため
+               // for
+               // 文を抜けた後に一回だけつかう。for文の中で何回も呼ぶと遅くなる
+               // どこでrefreshするかよく考えること。
+
     // [6-3-10] selection by input key
     switch (_getch()) {
     case 'w': // [6-3-11] if w key is hit
@@ -242,6 +245,9 @@ void SelectCommand() {
               // [6-13-14] change to down command
       characters[CHARACTER_PLAYER].command++;
       break;
+
+    default:  // [6-3-15] if other key is hit
+      return; // [6-3-16] exit the function
     }
     // [6-3-17] loop cursor up and down
     characters[CHARACTER_PLAYER].command =
