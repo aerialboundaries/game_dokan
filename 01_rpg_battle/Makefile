@@ -19,7 +19,7 @@ all: $(NAME)
 # リンク工程
 
 $(NAME): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ -lncurses
+	$(CC) $(CFLAGS) -o $@ $^ -lncursesw
 
 
 # コンパイル工程（ディレクトリ作成も同時に行う）
