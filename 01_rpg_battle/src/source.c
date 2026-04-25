@@ -136,6 +136,6 @@ void DrawBattleScreen(void) {
          characters[CHARACTER_MONSTER].maxHP);
 
   //[6-2-7] one blank row
-  printw("/n");
+  printw("\n");
 
 } // draw battle sceen
