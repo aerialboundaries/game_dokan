@@ -183,14 +183,28 @@ void Battle(int _monster) {
         // [6-4-14] wait for keyboard input
         _getch();
 
-        // [6-4-15] 的に与えるダメージを計算する
+        // [6-4-15] 敵に与えるダメージを計算する
         int damage = 1 + rand() % characters[i].attack;
 
         // [6-4-16] 的にダメージを与える
         characters[characters[i].target].hp -= damage;
 
+        // [6-4-17] 敵のHPが負の値になったかどうかを判定する
+        if (characters[characters[i].target].hp < 0) {
+          // [6-4-18] 敵のHPを0にする
+          characters[characters[i].target].hp = 0;
+        }
+
         // [6-4-19] 戦闘シーンの画面を再描画する関数を呼び出す
         DrawBattleScreen();
+
+        // [6-4-20] 敵にダメージを与えたメッセージを表示する
+        printw("%sに　%dの　ダメージ！\n",
+               characters[characters[i].target].name, damage);
+
+        // [6-4-21] キーボード入力を待つ
+        _getch();
+
         break;
 
       case COMMAND_SPELL: // [6-4-22] spell
