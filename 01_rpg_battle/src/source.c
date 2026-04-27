@@ -49,7 +49,7 @@ typedef struct {
     char name[4 * 3 + 1]; // name 4文字 x 全角3バイト(utf8) + '\0'
     char aa[256]; // [4-1-7] ASCII art
     int command; // [4-1-8] command
-    int target; // [4-1-9] 攻撃対象:w
+    int target; // [4-1-9] 攻撃対象
 } CHARACTER;
 
 /* [5] variables */
