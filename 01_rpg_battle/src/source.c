@@ -11,10 +11,11 @@
 /* [1] Headers */
 #include "console_manager.h"
 #include "input_handler.h"
-#include <locale.h>  // for ncurses
+#include <locale.h> // for ncurses
 #include <ncurses.h> // printwを使うために必要
 #include <stdlib.h> // [1-2] 標準ライブラリヘッダをインクルードする（srandのため）::
-#include <time.h>   // [1-4] 時間管理ヘッダーをインクルードする
+#include <string.h> // [1-3] 文字列操作ヘッダーをインクルードする
+#include <time.h> // [1-4] 時間管理ヘッダーをインクルードする
 // #include <stdio.h>
 
 /* [2] Constants */
@@ -22,16 +23,16 @@
 /* [3] enums */
 // monsters
 enum {
-  MONSTER_PLAYER, // player
-  MONSTER_SLIME,  // slime
-  MONSTER_MAX     // kinds of monster
+    MONSTER_PLAYER, // player
+    MONSTER_SLIME, // slime
+    MONSTER_MAX // kinds of monster
 };
 
 enum {
-  COMMAND_FIGHT, // [3-3-1] fight
-  COMMAND_SPELL, // [3-3-2] spell
-  COMMAND_RUN,   // [3-3-3] runaway
-  COMMAND_MAX    // [3-3-4] number of commands
+    COMMAND_FIGHT, // [3-3-1] fight
+    COMMAND_SPELL, // [3-3-2] spell
+    COMMAND_RUN, // [3-3-3] runaway
+    COMMAND_MAX // [3-3-4] number of commands
 };
 
 // kinds of characters
@@ -40,15 +41,15 @@ enum { CHARACTER_PLAYER, CHARACTER_MONSTER, CHARACTER_MAX };
 /* [4] structs */
 // [4-1]struct of characters
 typedef struct {
-  int hp;               // HP
-  int maxHP;            // Max HP
-  int mp;               // MP
-  int maxMP;            // Max MP
-  int attack;           // [4-1-5] 攻撃力
-  char name[4 * 3 + 1]; // name 4文字 x 全角3バイト(utf8) + '\0'
-  char aa[256];         // [4-1-7] ASCII art
-  int command;          // [4-1-8] command
-  int target;           // [4-1-9] 攻撃対象:w
+    int hp; // HP
+    int maxHP; // Max HP
+    int mp; // MP
+    int maxMP; // Max MP
+    int attack; // [4-1-5] 攻撃力
+    char name[4 * 3 + 1]; // name 4文字 x 全角3バイト(utf8) + '\0'
+    char aa[256]; // [4-1-7] ASCII art
+    int command; // [4-1-8] command
+    int target; // [4-1-9] 攻撃対象:w
 } CHARACTER;
 
 /* [5] variables */
@@ -56,26 +57,26 @@ typedef struct {
 CHARACTER monsters[MONSTER_MAX] = {
     // [5-1-1] MONSTER_PLAYER プレイヤー
     {
-        15,         // int hp HP
-        15,         // int maxHP  MaxHP
-        15,         // int mp MP
-        15,         // int Max HP
-        3,          // [5-1-6] int attack 攻撃力
+        15, // int hp HP
+        15, // int maxHP  MaxHP
+        15, // int mp MP
+        15, // int Max HP
+        3, // [5-1-6] int attack 攻撃力
         "ゆうしゃ", // [5-1-7] char name name [4 * 3 + 1] name
-        "",         // doesn't have aa but declare as ""
-        0,          // command initialize as 0
-        0,          // target initialize as 0
+        "", // doesn't have aa but declare as ""
+        0, // command initialize as 0
+        0, // target initialize as 0
     },
 
     // [5-1-8]MONSTER_SLIME
     {
-        3,          // int hp
-        3,          // int maxHP
-        0,          // int mp MP
-        0,          // int maxHP
-        2,          // [5-1-13] int attach 攻撃力
+        3, // int hp
+        3, // int maxHP
+        0, // int mp MP
+        0, // int maxHP
+        2, // [5-1-13] int attach 攻撃力
         "スライム", // char name [4 * 3 +1] name
-                    // [5-1-15] char aa[256] アスキーアート
+        // [5-1-15] char aa[256] アスキーアート
         "／・Д・＼\n"
         "～～～～～",
         0, // command initialize as 0
@@ -87,212 +88,249 @@ CHARACTER monsters[MONSTER_MAX] = {
 char commandNames[COMMAND_MAX][4 * 3 + 1] = {
     "たたかう", // [5-3-1]COMMAND_FIGHT
     "じゅもん", // [5-3-2]COMMAND_SPELL
-    "にげる"    // [5-3-3]COMMAND_RUN
+    "にげる" // [5-3-3]COMMAND_RUN
 };
 
 // array of characters
 CHARACTER characters[CHARACTER_MAX];
 
 /* [6] functions prototypes */
-void Battle(int _monster);   // battle scene
-void Init(void);             // initialize the game
+void Battle(int _monster); // battle scene
+void Init(void); // initialize the game
 void DrawBattleScreen(void); // draw battle sceen
-void SelectCommand();        // [6-3] select commands
+void SelectCommand(); // [6-3] select commands
 
 /* [6-6] main */
-int main(void) {
-  // [6-6-1] 乱数をシャッフルする
-  srand((unsigned int)time(NULL));
+int main(void)
+{
+    // [6-6-1] 乱数をシャッフルする
+    srand((unsigned int)time(NULL));
 
-  /* to use Japanese mult byte for ncurses */
-  setlocale(LC_ALL, "");
-  /* --- 最初に一度だけ初期化 ncurses--- */
-  init_console();
-  // initialize game data (must be before drawing)
-  Init();
+    /* to use Japanese mult byte for ncurses */
+    setlocale(LC_ALL, "");
+    /* --- 最初に一度だけ初期化 ncurses--- */
+    init_console();
+    // initialize game data (must be before drawing)
+    Init();
 
-  //  printw("Console Initialized.\n");
-  //  printw("Press any key (Press 'q' to quit)...\n");
-  //  refresh();
+    //  printw("Console Initialized.\n");
+    //  printw("Press any key (Press 'q' to quit)...\n");
+    //  refresh();
 
-  //   int ch;
-  //   while (1) {
-  //     /* input_handlerから _getch() を呼び出す */
-  //     ch = _getch();
-  //
-  //     if (ch == 'q')
-  //       break;
-  //
-  //     clear();
-  //     printw("Key: %c (Code: %d)\n", ch, ch);
-  //     printw("Keep pressing or press 'q' to quit.");
-  //
-  //     refresh();
-  //   }
+    //   int ch;
+    //   while (1) {
+    //     /* input_handlerから _getch() を呼び出す */
+    //     ch = _getch();
+    //
+    //     if (ch == 'q')
+    //       break;
+    //
+    //     clear();
+    //     printw("Key: %c (Code: %d)\n", ch, ch);
+    //     printw("Keep pressing or press 'q' to quit.");
+    //
+    //     refresh();
+    //   }
 
-  /* ここにプログラムを書いてみる */
-  // [6-6-3] call battle
-  Battle(MONSTER_SLIME);
+    /* ここにプログラムを書いてみる */
+    // [6-6-3] call battle
+    Battle(MONSTER_SLIME);
 
-  /* ここまでプログラム */
+    /* ここまでプログラム */
 
-  /* --- 最後に必ず終了処理 --- */
-  close_console();
+    /* --- 最後に必ず終了処理 --- */
+    close_console();
 
-  printw("Program ended safely.\n");
-  return 0;
+    printw("Program ended safely.\n");
+    return 0;
 }
 
 /* [6] function implement */
 // [6-4] Battle
-void Battle(int _monster) {
-  // [6-4-1] initialize monster's status
-  characters[CHARACTER_MONSTER] = monsters[_monster];
+void Battle(int _monster)
+{
+    // [6-4-1] initialize monster's status
+    characters[CHARACTER_MONSTER] = monsters[_monster];
 
-  //[6-4-2] set the target of player's target to a monster
-  characters[CHARACTER_PLAYER].target = CHARACTER_MONSTER;
+    //[6-4-2] set the target of player's target to a monster
+    characters[CHARACTER_PLAYER].target = CHARACTER_MONSTER;
 
-  //[6-4-3] set the monnsters' target to the player
-  characters[CHARACTER_MONSTER].target = CHARACTER_PLAYER;
+    //[6-4-3] set the monnsters' target to the player
+    characters[CHARACTER_MONSTER].target = CHARACTER_PLAYER;
 
-  // [6-4-4] call Battle Screen
-  DrawBattleScreen();
+    // [6-4-4] call Battle Screen
+    DrawBattleScreen();
 
-  // [6-4-5] display messages for battel scene
-  printw("%sが　あらわれた！\n", characters[CHARACTER_MONSTER].name);
+    // [6-4-5] display messages for battel scene
+    printw("%sが　あらわれた！\n", characters[CHARACTER_MONSTER].name);
 
-  //[6-4-6] wait for keybord input
-  _getch();
+    //[6-4-6] wait for keybord input
+    _getch();
 
-  //[6-4-7] loop until battle ends
-  while (1) {
-    //[6-4-8] select command
-    SelectCommand();
+    //[6-4-7] loop until battle ends
+    while (1) {
+        //[6-4-8] select command
+        SelectCommand();
 
-    //[6-4-9] repeat characters
-    for (int i = 0; i < CHARACTER_MAX; i++) {
-      // [6-4-10] refresh battle scene
-      DrawBattleScreen();
+        //[6-4-9] repeat characters
+        for (int i = 0; i < CHARACTER_MAX; i++) {
+            // [6-4-10] refresh battle scene
+            DrawBattleScreen();
 
-      // [6-4-11] selection by chosen commmand
-      switch (characters[i].command) {
-      case COMMAND_FIGHT: // [6-4-12] fight
-                          // // [6-4-13] display message to fight
-        printw("%sの　こうげき！\n", characters[i].name);
+            // [6-4-11] selection by chosen commmand
+            switch (characters[i].command) {
+            case COMMAND_FIGHT: // [6-4-12] fight
+                                // // [6-4-13] display message to fight
+                printw("%sの　こうげき！\n", characters[i].name);
 
-        // [6-4-14] wait for keyboard input
-        _getch();
+                // [6-4-14] wait for keyboard input
+                _getch();
 
-        // [6-4-15] 敵に与えるダメージを計算する
-        int damage = 1 + rand() % characters[i].attack;
+                // [6-4-15] 敵に与えるダメージを計算する
+                int damage = 1 + rand() % characters[i].attack;
 
-        // [6-4-16] 的にダメージを与える
-        characters[characters[i].target].hp -= damage;
+                // [6-4-16] 的にダメージを与える
+                characters[characters[i].target].hp -= damage;
 
-        // [6-4-17] 敵のHPが負の値になったかどうかを判定する
-        if (characters[characters[i].target].hp < 0) {
-          // [6-4-18] 敵のHPを0にする
-          characters[characters[i].target].hp = 0;
+                // [6-4-17] 敵のHPが負の値になったかどうかを判定する
+                if (characters[characters[i].target].hp < 0) {
+                    // [6-4-18] 敵のHPを0にする
+                    characters[characters[i].target].hp = 0;
+                }
+
+                // [6-4-19] 戦闘シーンの画面を再描画する関数を呼び出す
+                DrawBattleScreen();
+
+                // [6-4-20] 敵にダメージを与えたメッセージを表示する
+                printw("%sに　%dの　ダメージ！\n",
+                    characters[characters[i].target].name, damage);
+
+                // [6-4-21] キーボード入力を待つ
+                _getch();
+
+                break;
+
+            case COMMAND_SPELL: // [6-4-22] spell
+                break;
+            case COMMAND_RUN: // [6-4-35] runaway
+                break;
+            }
+
+            // [6-4-39] 攻撃対象を倒したかどうかを判定する
+            if (characters[characters[i].target].hp <= 0) {
+                // [6-4-40] 攻撃対象によって処理を分岐させる
+                switch (characters[i].target) {
+                // [6-4-41] プレイヤーなら
+                case CHARACTER_PLAYER:
+                    break;
+
+                // [6-4-43] モンスターなら
+                case CHARACTER_MONSTER:
+                    // [6-4-44]
+                    // モンスターのアスキーアートを何も表示しないように書き換える
+                    strcpy(characters[characters[i].target].aa, "\n");
+
+                    // [6-4-45] 戦闘シーンの画面を再描画する関数を呼び出す
+                    DrawBattleScreen();
+
+                    // [6-4-46] モンスターを倒したメッセージを表示する
+                    printw("%s をたおした！\n",
+                        characters[characters[i].target].name);
+                    break;
+                }
+                // [6-4-47] キーボード入力を待つ
+                _getch();
+
+                // [6-4-48] 戦闘シーンの関数を抜ける
+                return;
+            }
         }
-
-        // [6-4-19] 戦闘シーンの画面を再描画する関数を呼び出す
-        DrawBattleScreen();
-
-        // [6-4-20] 敵にダメージを与えたメッセージを表示する
-        printw("%sに　%dの　ダメージ！\n",
-               characters[characters[i].target].name, damage);
-
-        // [6-4-21] キーボード入力を待つ
-        _getch();
-
-        break;
-
-      case COMMAND_SPELL: // [6-4-22] spell
-        break;
-      case COMMAND_RUN: // [6-4-35] runaway
-        break;
-      }
     }
-  }
 
 } // battle scene
 
-void Init(void) {
-  characters[CHARACTER_PLAYER] = monsters[MONSTER_PLAYER];
+void Init(void)
+{
+    characters[CHARACTER_PLAYER] = monsters[MONSTER_PLAYER];
 } // initialize the game
 
-void DrawBattleScreen(void) {
-  // [6-2-1] clear screen
-  clear(); // ncursesの画面消去
+void DrawBattleScreen(void)
+{
+    // [6-2-1] clear screen
+    clear(); // ncursesの画面消去
 
-  // display player name
-  printw("%s\n", characters[CHARACTER_PLAYER]
-                     .name); // ncurses needs printw insted of printf
+    // display player name
+    printw("%s\n",
+        characters[CHARACTER_PLAYER]
+            .name); // ncurses needs printw insted of printf
 
-  printw("ＨＰ : %d / %d  ＭＰ : %d / %d\n", characters[CHARACTER_PLAYER].hp,
-         characters[CHARACTER_PLAYER].maxHP, characters[CHARACTER_PLAYER].mp,
-         characters[CHARACTER_PLAYER].maxHP);
+    printw("ＨＰ : %d / %d  ＭＰ : %d / %d\n", characters[CHARACTER_PLAYER].hp,
+        characters[CHARACTER_PLAYER].maxHP, characters[CHARACTER_PLAYER].mp,
+        characters[CHARACTER_PLAYER].maxHP);
 
-  printw("\n");
+    printw("\n");
 
-  //[6-2-5] draw ascii art of monster
-  printw("%s", characters[CHARACTER_MONSTER].aa);
+    //[6-2-5] draw ascii art of monster
+    printw("%s", characters[CHARACTER_MONSTER].aa);
 
-  //[6-2-6] display monster's hp
-  printw("(ＨＰ：%d／%d)\n", characters[CHARACTER_MONSTER].hp,
-         characters[CHARACTER_MONSTER].maxHP);
+    //[6-2-6] display monster's hp
+    printw("(ＨＰ：%d／%d)\n", characters[CHARACTER_MONSTER].hp,
+        characters[CHARACTER_MONSTER].maxHP);
 
-  //[6-2-7] one blank row
-  printw("\n");
+    //[6-2-7] one blank row
+    printw("\n");
 
-  refresh(); // printw and refersh() should be one set.
+    refresh(); // printw and refersh() should be one set.
 
 } // draw battle sceen
 
-void SelectCommand() {
-  // [6-3-2] roop until command is determined
-  while (1) {
-    // [6-3-3] call DrawBattleScreen();
-    DrawBattleScreen();
+void SelectCommand()
+{
+    // [6-3-2] roop until command is determined
+    while (1) {
+        // [6-3-3] call DrawBattleScreen();
+        DrawBattleScreen();
 
-    // [6-3-4] display list of commands
-    for (int i = 0; i < COMMAND_MAX; i++) {
-      // [6-3-5] if chosen command
-      if (i == characters[CHARACTER_PLAYER].command) {
-        // [6-3-6] draw cursor
-        printw("＞");
-        // [6-3-7] if not chosen command
-      } else {
-        // [6-3-8] draw wide space
-        printw("　");
-      }
+        // [6-3-4] display list of commands
+        for (int i = 0; i < COMMAND_MAX; i++) {
+            // [6-3-5] if chosen command
+            if (i == characters[CHARACTER_PLAYER].command) {
+                // [6-3-6] draw cursor
+                printw("＞");
+                // [6-3-7] if not chosen command
+            } else {
+                // [6-3-8] draw wide space
+                printw("　");
+            }
 
-      // [6-3-9] display command names
-      printw("%s\n", commandNames[i]); // ncursesではprintfではなくprintwを使う
+            // [6-3-9] display command names
+            printw("%s\n",
+                commandNames[i]); // ncursesではprintfではなくprintwを使う
+        }
+        refresh(); // printwはrefresh()が呼ばれるまで画面を更新しないのでprintwとセットで使う。
+                   // printwを複数実行した後で一気に画面表示を更新することで速度を上げるため
+                   // for
+                   // 文を抜けた後に一回だけつかう。for文の中で何回も呼ぶと遅くなる
+                   // どこでrefreshするかよく考えること。
+
+        // [6-3-10] selection by input key
+        switch (_getch()) {
+        case 'w': // [6-3-11] if w key is hit
+            // [6-3-12] change to up command
+            characters[CHARACTER_PLAYER].command--;
+            break;
+
+        case 's': // [6-3-13] if s key is hit
+                  // [6-13-14] change to down command
+            characters[CHARACTER_PLAYER].command++;
+            break;
+
+        default: // [6-3-15] if other key is hit
+            return; // [6-3-16] exit the function
+        }
+        // [6-3-17] loop cursor up and down
+        characters[CHARACTER_PLAYER].command
+            = (COMMAND_MAX + characters[CHARACTER_PLAYER].command)
+            % COMMAND_MAX;
     }
-    refresh(); // printwはrefresh()が呼ばれるまで画面を更新しないのでprintwとセットで使う。
-               // printwを複数実行した後で一気に画面表示を更新することで速度を上げるため
-               // for
-               // 文を抜けた後に一回だけつかう。for文の中で何回も呼ぶと遅くなる
-               // どこでrefreshするかよく考えること。
-
-    // [6-3-10] selection by input key
-    switch (_getch()) {
-    case 'w': // [6-3-11] if w key is hit
-      // [6-3-12] change to up command
-      characters[CHARACTER_PLAYER].command--;
-      break;
-
-    case 's': // [6-3-13] if s key is hit
-              // [6-13-14] change to down command
-      characters[CHARACTER_PLAYER].command++;
-      break;
-
-    default:  // [6-3-15] if other key is hit
-      return; // [6-3-16] exit the function
-    }
-    // [6-3-17] loop cursor up and down
-    characters[CHARACTER_PLAYER].command =
-        (COMMAND_MAX + characters[CHARACTER_PLAYER].command) % COMMAND_MAX;
-  }
 } // [6-3] select commands
