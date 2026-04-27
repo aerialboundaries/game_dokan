@@ -13,6 +13,8 @@
 #include "input_handler.h"
 #include <locale.h>  // for ncurses
 #include <ncurses.h> // printwを使うために必要
+#include <stdlib.h> // [1-2] 標準ライブラリヘッダをインクルードする（srandのため）::
+#include <time.h>   // [1-4] 時間管理ヘッダーをインクルードする
 // #include <stdio.h>
 
 /* [2] Constants */
@@ -42,23 +44,27 @@ typedef struct {
   int maxHP;            // Max HP
   int mp;               // MP
   int maxMP;            // Max MP
+  int attack;           // [4-1-5] 攻撃力
   char name[4 * 3 + 1]; // name 4文字 x 全角3バイト(utf8) + '\0'
   char aa[256];         // [4-1-7] ASCII art
   int command;          // [4-1-8] command
+  int target;           // [4-1-9] 攻撃対象:w
 } CHARACTER;
 
 /* [5] variables */
 // [5-1] monster's status
 CHARACTER monsters[MONSTER_MAX] = {
-    // MONSTER_PLAYER
+    // [5-1-1] MONSTER_PLAYER プレイヤー
     {
         15,         // int hp HP
         15,         // int maxHP  MaxHP
         15,         // int mp MP
         15,         // int Max HP
-        "ゆうしゃ", // char name name
-        "",
-        0, // doesn't have aa but declare as ""
+        3,          // [5-1-6] int attack 攻撃力
+        "ゆうしゃ", // [5-1-7] char name name [4 * 3 + 1] name
+        "",         // doesn't have aa but declare as ""
+        0,          // command initialize as 0
+        0,          // target initialize as 0
     },
 
     // [5-1-8]MONSTER_SLIME
@@ -67,11 +73,13 @@ CHARACTER monsters[MONSTER_MAX] = {
         3,          // int maxHP
         0,          // int mp MP
         0,          // int maxHP
+        2,          // [5-1-13] int attach 攻撃力
         "スライム", // char name [4 * 3 +1] name
                     // [5-1-15] char aa[256] アスキーアート
         "／・Д・＼\n"
         "～～～～～",
-        0,
+        0, // command initialize as 0
+        0, // target initialize as 0
     },
 };
 
@@ -93,6 +101,9 @@ void SelectCommand();        // [6-3] select commands
 
 /* [6-6] main */
 int main(void) {
+  // [6-6-1] 乱数をシャッフルする
+  srand((unsigned int)time(NULL));
+
   /* to use Japanese mult byte for ncurses */
   setlocale(LC_ALL, "");
   /* --- 最初に一度だけ初期化 ncurses--- */
@@ -135,9 +146,16 @@ int main(void) {
 /* [6] function implement */
 // [6-4] Battle
 void Battle(int _monster) {
-  // initialize monster's status
+  // [6-4-1] initialize monster's status
   characters[CHARACTER_MONSTER] = monsters[_monster];
 
+  //[6-4-2] set the target of player's target to a monster
+  characters[CHARACTER_PLAYER].target = CHARACTER_MONSTER;
+
+  //[6-4-3] set the monnsters' target to the player
+  characters[CHARACTER_MONSTER].target = CHARACTER_PLAYER;
+
+  // [6-4-4] call Battle Screen
   DrawBattleScreen();
 
   // [6-4-5] display messages for battel scene
@@ -164,7 +182,17 @@ void Battle(int _monster) {
 
         // [6-4-14] wait for keyboard input
         _getch();
+
+        // [6-4-15] 的に与えるダメージを計算する
+        int damage = 1 + rand() % characters[i].attack;
+
+        // [6-4-16] 的にダメージを与える
+        characters[characters[i].target].hp -= damage;
+
+        // [6-4-19] 戦闘シーンの画面を再描画する関数を呼び出す
+        DrawBattleScreen();
         break;
+
       case COMMAND_SPELL: // [6-4-22] spell
         break;
       case COMMAND_RUN: // [6-4-35] runaway
