@@ -325,7 +325,26 @@ void Battle(int _monster) {
         break;
 
       case COMMAND_SPELL: // [6-4-22] 呪文　spell
+        // [6-4-29] 呪文を唱えたメッセージを表示する
+        printw("%sは　ヒールを　となえた！\n", characters[i].name);
+
+        // [6-4-30] キーボード入力を待つ
+        _getch();
+
+        //[6-4-31] HPを回復させる
+        characters[i].hp = characters[i].maxHP;
+
+        //[6-4-32] 戦闘シーンの画面を再描画する
+        DrawBattleScreen();
+
+        //[6-4-33] HPが回復したメッセージを表示する
+        printw("%sのきずが　かいふくした！\n", characters[i].name);
+
+        //[6-4-34] キーボード入力を待つ
+        _getch();
+
         break;
+
       case COMMAND_RUN: // [6-4-35] 逃げる　runaway
         // [6-4-36] 逃げ出したメッセージを表示する
         printw("%s　は　にげだした！\n", characters[i].name);
