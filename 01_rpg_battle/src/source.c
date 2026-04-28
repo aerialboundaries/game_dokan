@@ -21,6 +21,7 @@
 // #include <stdio.h>
 
 /* [2] Constants */
+#define SPELL_COST 3 // [2-1] 呪文の消費MPを定義する
 
 /* [3] enums */
 // [3-1] モンスターの種類を定義する
@@ -209,6 +210,9 @@ void DrawBattleScreen(void) {
 
 // [6-3] コマンドを選択する関数を宣言する
 void SelectCommand() {
+  // [6-3-1] プレイヤーのコマンドを初期化する
+  characters[CHARACTER_PLAYER].command = COMMAND_FIGHT;
+
   // [6-3-2] コマンドが決定されるまでループする　roop until command is
   // determined
   while (1) {
@@ -325,6 +329,24 @@ void Battle(int _monster) {
         break;
 
       case COMMAND_SPELL: // [6-4-22] 呪文　spell
+        // [6-4-23] MPが足りるかどうかを判定する
+        if (characters[i].mp < SPELL_COST) {
+          // [6-4-24] MPが足りないメッセージを表示する
+          printw("ＭＰが　たりない！\n");
+
+          // [6-4-25] キーボード入力を待つ
+          _getch();
+
+          // [6-4-26] 呪文を唱える処理を抜ける
+          break;
+        }
+
+        // [6-4-27] MPを消費させる
+        characters[i].mp -= SPELL_COST;
+
+        // [6-4-28] 画面を再描画する
+        DrawBattleScreen();
+
         // [6-4-29] 呪文を唱えたメッセージを表示する
         printw("%sは　ヒールを　となえた！\n", characters[i].name);
 
