@@ -27,6 +27,7 @@
 enum {
   MONSTER_PLAYER, // [3-1-1] player
   MONSTER_SLIME,  // [3-1-2] slime
+  MONSTER_BOSS,   // [3-1-3] 魔王
   MONSTER_MAX     // [3-1-4] モンスターの種類の数
 };
 
@@ -64,11 +65,11 @@ typedef struct {
 CHARACTER monsters[MONSTER_MAX] = {
     // [5-1-1] MONSTER_PLAYER プレイヤー
     {
-        15,         // [5-1-2] int hp HP
-        15,         // [5-1-3] int maxHP  MaxHP
+        100,        // [5-1-2] int hp HP
+        100,        // [5-1-3] int maxHP  MaxHP
         15,         // [5-1-4] int mp MP
         15,         // [5-1-5] int Max HP
-        3,          // [5-1-6] int attack 攻撃力
+        30,         // [5-1-6] int attack 攻撃力
         "ゆうしゃ", // [5-1-7] char name name [4 * 3 + 1] name
         "",         // doesn't have aa but declare as ""
         0,          // command initialize as 0
@@ -86,6 +87,21 @@ CHARACTER monsters[MONSTER_MAX] = {
         // [5-1-15] char aa[256] アスキーアート
         "／・Д・＼\n"
         "～～～～～",
+        0, // command initialize as 0
+        0, // target initialize as 0
+    },
+
+    // [5-1-16]MONSTER_BOSS
+    {
+        255,      // [5-1-17] int hp
+        255,      // [5-1-18] int maxHP
+        0,        // [5-1-19] int mp MP
+        0,        // [5-1-20] int maxHP
+        50,       // [5-1-21] int attach 攻撃力
+        "まおう", // [5-1-21] char name [4 * 3 +1] name
+        // [5-1-23] char aa[256] アスキーアート
+        "　Ａ＠Ａ\n"
+        "ψ（▼皿▼）ψ",
         0, // command initialize as 0
         0, // target initialize as 0
     },
@@ -141,7 +157,7 @@ int main(void) {
 
   /* ここにプログラムを書いてみる */
   // [6-6-3] 戦闘シーンの関数を呼び出す call battle
-  Battle(MONSTER_SLIME);
+  Battle(MONSTER_BOSS);
 
   /* ここまでプログラム */
 
@@ -248,11 +264,11 @@ void Battle(int _monster) {
   characters[CHARACTER_MONSTER] = monsters[_monster];
 
   //[6-4-2] プレイヤーの攻撃対象をモンスターに設定する　set the target of
-  //playert to a monster
+  // playert to a monster
   characters[CHARACTER_PLAYER].target = CHARACTER_MONSTER;
 
   //[6-4-3] モンスターの攻撃対象をプレイヤーに設定する　set the monnsters'
-  //target to the player
+  // target to the player
   characters[CHARACTER_MONSTER].target = CHARACTER_PLAYER;
 
   // [6-4-4] call Battle Screen
@@ -320,6 +336,8 @@ void Battle(int _monster) {
         switch (characters[i].target) {
         // [6-4-41] プレイヤーなら
         case CHARACTER_PLAYER:
+          // [6-4-42] プレイヤーが死んだメッセージを表示する
+          printw("あなたは　しにました");
           break;
 
         // [6-4-43] モンスターなら
