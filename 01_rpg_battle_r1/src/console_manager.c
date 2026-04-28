@@ -4,13 +4,21 @@
  */
 
 #include "console_manager.h"
+#include <locale.h> // for ncurses
 #include <ncurses.h>
 
-void init_console(void) {
-  initscr(); /* ncursesを開始 */
-  cbreak();  /* Enter待ちを無効化 winのconio.hでは標準 */
-  noecho();  /* 入力文字を表示しない winのconio.hでは標準 */
-  keypad(stdscr, TRUE); /* 特殊キーの取得を有効化 *winのconio.hでは標準 */
+void init_console(void)
+{
+    /* 最初にJapanese multi byte を ncursesで使えるようにlocaleを設定 */
+    setlocale(LC_ALL, "");
+
+    initscr(); /* ncursesを開始 */
+    cbreak(); /* Enter待ちを無効化 winのconio.hでは標準 */
+    noecho(); /* 入力文字を表示しない winのconio.hでは標準 */
+    keypad(stdscr, TRUE); /* 特殊キーの取得を有効化 *winのconio.hでは標準 */
 }
 
-void close_console(void) { endwin(); /* ncursesを終了 */ }
+void close_console(void)
+{
+    endwin(); /* ncursesを終了 */
+}
