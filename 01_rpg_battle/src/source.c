@@ -327,6 +327,13 @@ void Battle(int _monster) {
       case COMMAND_SPELL: // [6-4-22] 呪文　spell
         break;
       case COMMAND_RUN: // [6-4-35] 逃げる　runaway
+        // [6-4-36] 逃げ出したメッセージを表示する
+        printw("%s　は　にげだした！\n", characters[i].name);
+        // [6-4-37] キーボード入力を待つ
+        _getch();
+
+        //[6-4-38] 戦闘処理を抜ける
+        return;
         break;
       }
 
