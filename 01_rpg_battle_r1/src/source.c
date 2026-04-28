@@ -2,7 +2,7 @@
 /* 2026-04-23 */
 /* console setting
  * font size = 72
- * font = misaki
+ * font = 美咲ゴシック第2
  * widh 32
  * hight 10
  * write in alacritty-game.toml
@@ -10,7 +10,6 @@
 
 /* [1] Headers */
 #include "console_manager.h"
-#include "input_handler.h"
 #include <locale.h>  // for ncurses
 #include <ncurses.h> // printwを使うために必要
 // #include <stdio.h> // [1-1] 標準入出力ヘッダーをインクルードする
@@ -18,105 +17,10 @@
 #include <stdlib.h> // [1-2] 標準ライブラリヘッダをインクルードする（srandのため）::
 #include <string.h> // [1-3] 文字列操作ヘッダーをインクルードする
 #include <time.h> // [1-4] 時間管理ヘッダーをインクルードする
-// #include <stdio.h>
 
-/* [2] Constants */
-#define SPELL_COST 3 // [2-1] 呪文の消費MPを定義する
-
-/* [3] enums */
-// [3-1] モンスターの種類を定義する
-enum {
-  MONSTER_PLAYER, // [3-1-1] player
-  MONSTER_SLIME,  // [3-1-2] slime
-  MONSTER_BOSS,   // [3-1-3] 魔王
-  MONSTER_MAX     // [3-1-4] モンスターの種類の数
-};
-
-// [3-2] キャラクターの種類を定義する　kinds of characters
-enum {
-  CHARACTER_PLAYER,  // [3-2-1] プレイヤー
-  CHARACTER_MONSTER, // [3-2-2] モンスター
-  CHARACTER_MAX      //[3-2-3] キャラクターの種類の数
-};
-
-// [3-3] コマンドの種類を定義する
-enum {
-  COMMAND_FIGHT, // [3-3-1] 戦う　fight
-  COMMAND_SPELL, // [3-3-2] 呪文　spell
-  COMMAND_RUN,   // [3-3-3] 逃げる　runaway
-  COMMAND_MAX    // [3-3-4] コマンドの種類の数　number of commands
-};
-
-/* [4] structs */
-// [4-1]struct of characters
-typedef struct {
-  int hp;               // [4-1-1] HP
-  int maxHP;            // [4-1-2] Max HP
-  int mp;               // [4-1-3] MP
-  int maxMP;            // [4-1-4] Max MP
-  int attack;           // [4-1-5] 攻撃力
-  char name[4 * 3 + 1]; // [4-1-6] name 4文字 x 全角3バイト(utf8) + '\0'
-  char aa[256];         // [4-1-7] ASCII art
-  int command;          // [4-1-8] command
-  int target;           // [4-1-9] 攻撃対象
-} CHARACTER;
-
-/* [5] variables */
-// [5-1] モンスターのステータスの配列を宣言する　monster's status
-CHARACTER monsters[MONSTER_MAX] = {
-    // [5-1-1] MONSTER_PLAYER プレイヤー
-    {
-        100,        // [5-1-2] int hp HP
-        100,        // [5-1-3] int maxHP  MaxHP
-        15,         // [5-1-4] int mp MP
-        15,         // [5-1-5] int Max HP
-        30,         // [5-1-6] int attack 攻撃力
-        "ゆうしゃ", // [5-1-7] char name name [4 * 3 + 1] name
-        "",         // doesn't have aa but declare as ""
-        0,          // command initialize as 0
-        0,          // target initialize as 0
-    },
-
-    // [5-1-8]MONSTER_SLIME
-    {
-        3,          // [5-1-9] int hp
-        3,          // [5-1-10] int maxHP
-        0,          // [5-1-11] int mp MP
-        0,          // [5-1-12] int maxHP
-        2,          // [5-1-13] int attach 攻撃力
-        "スライム", // [5-1-14] char name [4 * 3 +1] name
-        // [5-1-15] char aa[256] アスキーアート
-        "／・Д・＼\n"
-        "～～～～～",
-        0, // command initialize as 0
-        0, // target initialize as 0
-    },
-
-    // [5-1-16]MONSTER_BOSS
-    {
-        255,      // [5-1-17] int hp
-        255,      // [5-1-18] int maxHP
-        0,        // [5-1-19] int mp MP
-        0,        // [5-1-20] int maxHP
-        50,       // [5-1-21] int attach 攻撃力
-        "まおう", // [5-1-21] char name [4 * 3 +1] name
-        // [5-1-23] char aa[256] アスキーアート
-        "　Ａ＠Ａ\n"
-        "ψ（▼皿▼）ψ",
-        0, // command initialize as 0
-        0, // target initialize as 0
-    },
-};
-
-// [5-2] キャラクターの配列を宣言する　array of characters
-CHARACTER characters[CHARACTER_MAX];
-
-// [5-3] コマンドの名前を宣言する　declare command names
-char commandNames[COMMAND_MAX][4 * 3 + 1] = {
-    "たたかう", // [5-3-1]COMMAND_FIGHT
-    "じゅもん", // [5-3-2]COMMAND_SPELL
-    "にげる"    // [5-3-3]COMMAND_RUN
-};
+// [1-1] My headers
+#include "data.h"  // データの定義
+#include "types.h" // 定数の定義
 
 /* [6a] functions prototypes */
 void Battle(int _monster);   // [6-4] battle scene
@@ -143,8 +47,8 @@ int main(void) {
 
   //   int ch;
   //   while (1) {
-  //     /* input_handlerから _getch() を呼び出す */
-  //     ch = _getch();
+  //     /* input_handlerから getch() を呼び出す */
+  //     ch = getch();
   //
   //     if (ch == 'q')
   //       break;
@@ -242,7 +146,7 @@ void SelectCommand() {
                // どこでrefreshするかよく考えること。
 
     // [6-3-10] 入力されたキーによって分岐する　selection by input key
-    switch (_getch()) {
+    switch (getch()) {
     case 'w': // [6-3-11] if w key is hit
       // [6-3-12] change to up command
       characters[CHARACTER_PLAYER].command--;
@@ -283,7 +187,7 @@ void Battle(int _monster) {
   printw("%sが　あらわれた！\n", characters[CHARACTER_MONSTER].name);
 
   //[6-4-6] wait for keybord input
-  _getch();
+  getch();
 
   //[6-4-7] 戦闘が終了するまでループする　loop until battle ends
   while (1) {
@@ -302,7 +206,7 @@ void Battle(int _monster) {
         printw("%sの　こうげき！\n", characters[i].name);
 
         // [6-4-14] wait for keyboard input
-        _getch();
+        getch();
 
         // [6-4-15] 敵に与えるダメージを計算する
         int damage = 1 + rand() % characters[i].attack;
@@ -324,7 +228,7 @@ void Battle(int _monster) {
                characters[characters[i].target].name, damage);
 
         // [6-4-21] キーボード入力を待つ
-        _getch();
+        getch();
 
         break;
 
@@ -335,7 +239,7 @@ void Battle(int _monster) {
           printw("ＭＰが　たりない！\n");
 
           // [6-4-25] キーボード入力を待つ
-          _getch();
+          getch();
 
           // [6-4-26] 呪文を唱える処理を抜ける
           break;
@@ -351,7 +255,7 @@ void Battle(int _monster) {
         printw("%sは　ヒールを　となえた！\n", characters[i].name);
 
         // [6-4-30] キーボード入力を待つ
-        _getch();
+        getch();
 
         //[6-4-31] HPを回復させる
         characters[i].hp = characters[i].maxHP;
@@ -363,7 +267,7 @@ void Battle(int _monster) {
         printw("%sのきずが　かいふくした！\n", characters[i].name);
 
         //[6-4-34] キーボード入力を待つ
-        _getch();
+        getch();
 
         break;
 
@@ -371,7 +275,7 @@ void Battle(int _monster) {
         // [6-4-36] 逃げ出したメッセージを表示する
         printw("%s　は　にげだした！\n", characters[i].name);
         // [6-4-37] キーボード入力を待つ
-        _getch();
+        getch();
 
         //[6-4-38] 戦闘処理を抜ける
         return;
@@ -402,7 +306,7 @@ void Battle(int _monster) {
           break;
         }
         // [6-4-47] キーボード入力を待つ
-        _getch();
+        getch();
 
         // [6-4-48] 戦闘シーンの関数を抜ける
         return;
