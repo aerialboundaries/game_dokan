@@ -9,6 +9,7 @@
  */
 
 /* [1] Headers */
+#define _XOPEN_SOURCE_EXTENDED // for ncurse
 #include <locale.h> // for ncurses
 #include <ncursesw/curses.h> // printwを使うために必要
 // #include <stdio.h> // [1-1] 標準入出力ヘッダーをインクルードする
@@ -39,7 +40,7 @@ void DrawField()
         // [4-1-3] フィールドのすべての列を反復する
         for (int x = 0; x < FIELD_WIDTH; x++) {
             // [4-1-4] セルが生きていれば「■」を、死んでいれば「　」を描画する
-            // printw("%s", field[y][x] ? "■" : "　");
+            // mvaddwstr(y, x, field[y][x] ? L"■" : L"□");
             printw("%s", field[y][x] ? "[]" : "  ");
         }
         printw("\n"); // [4-1-15] 1行描画するごとに改行する
