@@ -40,7 +40,7 @@ void DrawField()
         for (int x = 0; x < FIELD_WIDTH; x++) {
             // [4-1-4] セルが生きていれば「■」を、死んでいれば「　」を描画する
             // printw("%s", field[y][x] ? "■" : "　");
-            printw("%s", field[y][x] ? "#" : " ");
+            printw("%s", field[y][x] ? "[]" : "  ");
         }
         printw("\n"); // [4-1-15] 1行描画するごとに改行する
     }
